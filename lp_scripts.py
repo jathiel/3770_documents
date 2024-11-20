@@ -42,7 +42,7 @@ def bnd_print(arr):
         out_arr[2] = str(arr[2])
     return out_arr[0] + ' <= ' + out_arr[1] + ' <= ' + out_arr[2]
 
-def lp(var, con, ob, M, c_bnd, v_bnd, mx=True):
+def lp(var, con, ob, M, c_bnd, v_bnd, m, mx=True):
     ob = np.array(ob)
     M = np.array(M)
     c_bnd = np.array(c_bnd)
@@ -55,6 +55,7 @@ def lp(var, con, ob, M, c_bnd, v_bnd, mx=True):
             else:
                 print(f'{ob[i]} X{i+1} +', end=' ')
     else:
+        res = sp.optimize.linprog(ob, A_ub=M, b_ub=c_bnd, bounds=v_bnd)
         print('MIN:', end=' ')
         for i in range(len(ob)):
             if i == len(ob)-1:
@@ -88,7 +89,7 @@ def lp(var, con, ob, M, c_bnd, v_bnd, mx=True):
     print(' ')
     table2 = [['ROW', 'SLACK', 'SHADOW PRICE']]
     if mx:
-        table2 += [[con[i], round(res.slack[i],3), -round(res.ineqlin['marginals'][i],3)] for i in range(len(con))]
+        table2 += [[con[i], round(res.slack[i],3), round(-res.ineqlin['marginals'][i],3)] for i in range(len(con))]
     else:
-        table2 += [[con[i], round(res.slack[i],3), round(res.ineqlin['marginals'][i],3)] for i in range(len(con))]
+        table2 += [[con[i], round(res.slack[i],3), round(m[i]*float(res.ineqlin['marginals'][i]),3)] for i in range(len(con))]
     print(tabulate(table2, headers="firstrow"))
